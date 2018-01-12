@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/http"
 	"github.com/julienschmidt/httprouter"
+	"database/sql"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 var (
@@ -14,6 +16,7 @@ var (
 )
 
 func main() {
+	connectmariadb()
 	flag.Parse()
 	data = map[string]string{}
 	r := httprouter.New()
@@ -23,6 +26,22 @@ func main() {
 	err := http.ListenAndServe(*addr, r)
 	if err != nil {
 		log.Fatal("ListenAndServe:", err)
+	}
+}
+
+func connectmariadb() {
+	db,_ := sql.Open("mysql", "API_user:@/API_DB")
+	defer db.Close()
+
+	// Connect and check the server version
+	var version string
+	quer := db.QueryRow("SELECT VERSION()").Scan(&version)
+	//("SELECT * FROM Animal")
+	if quer != nil{
+		fmt.Println("Connected to:", version)
+		fmt.Println(quer)
+	} else {
+		fmt.Println("Perdu")
 	}
 }
 
